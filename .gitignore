@@ -1,0 +1,58 @@
+# Compiled class files
+target/
+*.class
+
+# Package files
+*.jar
+*.war
+*.ear
+
+# Log files
+*.log
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# CDK
+cdk.out/
+cdk.context.json
+
+# Docker
+docker-compose.override.yml
+
+# SDD OpenSpec artifacts (planning docs, not production code)
+openspec/
+
+# Secrets
+*.pem
+*.key
+.env
+.env.local
+.env.*.local
+
+# Build
+build/
+dist/
+node_modules/
+
+# Test
+test-output/

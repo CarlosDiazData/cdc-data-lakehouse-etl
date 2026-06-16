@@ -1,0 +1,11 @@
+{
+  "app": "mvn -pl cdk-infra exec:java -Dexec.mainClass=com.cdc.infra.CdcInfraApp",
+  "context": {
+    "@aws-cdk/core:newStyleStackSynthesis": true,
+    "@aws-cdk/core:stackRelativeExports": true
+  },
+  "watch": {
+    "include": ["cdk-infra/src/**"]
+  },
+  "requireApproval": "never"
+}

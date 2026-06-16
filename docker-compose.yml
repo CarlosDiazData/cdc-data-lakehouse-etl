@@ -1,0 +1,60 @@
+version: "3.9"
+
+# CDC Data Lakehouse — Local Development Environment
+# PostgreSQL 14 source database (simulates RDS for local testing)
+
+services:
+  postgres:
+    image: postgres:14-alpine
+    container_name: cdc-source-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ecommerce
+      POSTGRES_USER: etl_user
+      POSTGRES_PASSWORD: etl_pass
+      POSTGRES_INITDB_ARGS: "--data-checksums"
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U etl_user -d ecommerce"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    command: >
+      postgres
+      -c wal_level=logical
+      -c max_wal_senders=5
+      -c max_replication_slots=5
+      -c wal_keep_size=256
+    networks:
+      - cdc-network
+
+  # For AWS integration tests (LocalStack emulates S3, Glue)
+  localstack:
+    image: localstack/localstack:3.4
+    container_name: cdc-localstack
+    environment:
+      SERVICES: s3,glue,sts
+      DEFAULT_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      DATA_DIR: /tmp/localstack/data
+    ports:
+      - "4566:4566"            # LocalStack Gateway
+      - "4510-4559:4510-4559"  # Service ports
+    volumes:
+      - localstack-data:/tmp/localstack
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - cdc-network
+
+volumes:
+  pgdata:
+  localstack-data:
+
+networks:
+  cdc-network:
+    driver: bridge

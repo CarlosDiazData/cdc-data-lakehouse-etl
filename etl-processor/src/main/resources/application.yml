@@ -1,0 +1,64 @@
+# CDC Data Lakehouse — ETL Processor Configuration
+# Spring Boot 3.x application settings
+
+spring:
+  application:
+    name: cdc-etl-processor
+
+# ── AWS ──────────────────────────────────────────────
+aws:
+  region: ${AWS_REGION:us-east-1}
+  s3:
+    raw-bucket: ${RAW_BUCKET:cdc-raw-data}
+    lakehouse-bucket: ${LAKEHOUSE_BUCKET:cdc-lakehouse-data}
+  glue:
+    database: ${GLUE_DATABASE:lakehouse_db}
+
+# ── File Discovery ───────────────────────────────────
+etl:
+  discovery:
+    polling-interval-seconds: 60
+    # Strategy pattern: "polling" now, "sqs" later
+    strategy: ${DISCOVERY_STRATEGY:polling}
+  raw-prefix: dms-source
+
+# ── Iceberg ──────────────────────────────────────────
+iceberg:
+  warehouse: s3://${aws.s3.lakehouse-bucket}/iceberg/
+  catalog:
+    type: glue
+    database: ${aws.glue.database}
+  format-version: 2
+  compression: snappy
+
+# ── MD5 Surrogate Keys ───────────────────────────────
+keys:
+  # Must match Python: int(md5_hash.hexdigest()[:16], 16)
+  algorithm: MD5
+  hex-prefix-length: 16
+  radix: 16
+
+# ── Logging ──────────────────────────────────────────
+logging:
+  level:
+    root: INFO
+    com.cdc.etl: DEBUG
+    software.amazon.awssdk: WARN
+    org.apache.iceberg: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# ── Management ───────────────────────────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+# ── Server ───────────────────────────────────────────
+server:
+  port: ${SERVER_PORT:8081}
+  shutdown: graceful
