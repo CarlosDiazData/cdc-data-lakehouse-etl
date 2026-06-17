@@ -3,6 +3,7 @@ package com.cdc.etl.reader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -189,7 +190,7 @@ public class S3Reader {
                 .build();
 
         try (ResponseInputStream<GetObjectResponse> s3Stream = s3Client.getObject(request)) {
-            Files.copy(s3Stream, tempFile);
+            Files.copy(s3Stream, tempFile, StandardCopyOption.REPLACE_EXISTING);
         }
         log.debug("Downloaded {} ({} bytes) to {}", file.uri(), Files.size(tempFile), tempFile);
     }
